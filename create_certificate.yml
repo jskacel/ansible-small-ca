@@ -20,6 +20,11 @@
           - subject_alt_name is defined
         fail_msg: "Failed: Variable secret_ca_passphrase is not set."
 
+    - name: Make sure python3-cryptography package is installed
+      ansible.builtin.dnf:
+        name: python3-cryptography
+        state: latest
+
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
         path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.key"
