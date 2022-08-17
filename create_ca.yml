@@ -25,6 +25,7 @@
     - name: Create private key with password protection
       community.crypto.openssl_privatekey:
         path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        cipher: aes256
         passphrase: "{{ secret_ca_passphrase }}"
 
     - name: Create certificate signing request (CSR) for CA certificate
