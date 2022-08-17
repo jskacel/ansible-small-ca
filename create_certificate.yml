@@ -38,7 +38,6 @@
     - name: Check whether certificate exists
       ansible.builtin.stat:
         path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
-      run_once: true
       register: certificate_exists
 
     - name: Read existing certificate if exists
