@@ -1,6 +1,6 @@
 ---
 - name: Create CA
-  hosts: all
+  hosts: servers
 
 #  vars:
 #    secret_ca_passphrase: "Th3!PassW0rD" # (required)
