@@ -19,8 +19,6 @@
           - secret_ca_passphrase is defined
           - subject_alt_name is defined
         fail_msg: "Failed: Variable secret_ca_passphrase is not set."
-      delegate_to: "{{ item }}"
-      loop: "{{ groups['servers'] }}"
 
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
