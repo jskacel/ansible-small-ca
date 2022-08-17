@@ -1,0 +1,49 @@
+---
+- name: Create CA
+  hosts: ca
+
+#  vars:
+#    secret_ca_passphrase: "Th3!PassW0rD" # (required)
+#    ca_path: "/certificates"             # (optional) - default is /certificates
+#    ca_common_name: "Ansible CA"         # (optional) - default is "Ansible CA"
+
+  tasks:
+    - name: Check we have all variables configured
+      ansible.builtin.assert:
+        that:
+          - secret_ca_passphrase is defined
+        fail_msg: "Failed: Variable secret_ca_passphrase is not set."
+    
+    - name: Make sure folder for CA exists
+      ansible.builtin.file:
+        path: "{{ ca_path | default('/certificates') }}"
+        mode: 0700
+        owner: root
+        group: root
+
+    - name: Create private key with password protection
+      community.crypto.openssl_privatekey:
+        path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        passphrase: "{{ secret_ca_passphrase }}"
+
+    - name: Create certificate signing request (CSR) for CA certificate
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        privatekey_passphrase: "{{ secret_ca_passphrase }}"
+        common_name: "{{ ca_common_name | default('Ansible CA') }}"
+        use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+        basic_constraints:
+          - 'CA:TRUE'
+        basic_constraints_critical: yes
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+      register: ca_csr
+
+    - name: Create self-signed CA certificate from CSR
+      community.crypto.x509_certificate:
+        path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        csr_content: "{{ ca_csr.csr }}"
+        privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        privatekey_passphrase: "{{ secret_ca_passphrase }}"
+        provider: selfsigned
