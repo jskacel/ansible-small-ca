@@ -17,6 +17,7 @@
     - name: Make sure folder for CA exists
       ansible.builtin.file:
         path: "{{ ca_path | default('/certificates') }}"
+        state: directory
         mode: 0700
         owner: root
         group: root
