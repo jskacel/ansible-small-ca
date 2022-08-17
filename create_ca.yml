@@ -22,6 +22,11 @@
         owner: root
         group: root
 
+    - name: Make sure python3-cryptography package is installed
+      ansible.builtin.dnf:
+        name: python3-cryptography
+        state: latest        
+
     - name: Create private key with password protection
       community.crypto.openssl_privatekey:
         path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
