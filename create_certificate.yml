@@ -28,13 +28,11 @@
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
         path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.key"
-      run_once: true
 
     - name: Create certificate signing request (CSR) for new certificate
       community.crypto.openssl_csr_pipe:
         privatekey_path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.key"
         subject_alt_name: "{{ subject_alt_name }}"
-      run_once: true
       register: csr
 
     - name: Check whether certificate exists
@@ -47,7 +45,6 @@
       ansible.builtin.slurp:
         src: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
       when: certificate_exists.stat.exists
-      run_once: true
       register: certificate
 
     - name: Sign certificate with our CA
@@ -68,5 +65,4 @@
       ansible.builtin.copy:
         dest: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
         content: "{{ certificate.certificate }}"
-      run_once: true
       when: certificate is changed
