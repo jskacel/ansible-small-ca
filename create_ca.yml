@@ -49,7 +49,7 @@
 
     - name: Create self-signed CA certificate from CSR
       community.crypto.x509_certificate:
-        path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        path: "{{ ca_path | default('/certificates') }}/ca-certificate.pem"
         csr_content: "{{ ca_csr.csr }}"
         privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
