@@ -1,6 +1,7 @@
 ---
 - name: Create CA
   hosts: servers
+  serial: 1
 
 #  vars:
 #    secret_ca_passphrase: "Th3!PassW0rD" # (required)
