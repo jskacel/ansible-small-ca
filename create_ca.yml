@@ -38,9 +38,9 @@
         privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
         common_name: "{{ ca_common_name | default('Ansible CA') }}"
-        country: "{{ locality | default('Czech Republic') }}"
-        state: "{{ locality | default('Brno') }}"
-        locality: "{{ locality | default('Brno') }}"
+        country_name: "{{ locality | default('Czech Republic') }}"
+        state_or_province_name: "{{ locality | default('Brno') }}"
+        locality_name: "{{ locality | default('Brno') }}"
         organization_name: "{{ locality | default('Red Hat') }}"
         organizational_unit_name: "{{ locality | default('Ansible') }}"
         use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
