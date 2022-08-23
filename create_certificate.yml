@@ -80,3 +80,10 @@
         dest: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.pem"
         content: "{{ certificate.certificate }}"
       when: certificate is changed
+
+    - name: Write certificate file on destination server
+      ansible.builtin.synchronize:
+        src: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
+        dest: "/tmp/test.pem"
+        mode: push
+      delegate_to: "{{ groups['ca'][0] }}"
