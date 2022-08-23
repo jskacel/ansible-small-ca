@@ -35,13 +35,6 @@
         state: latest
       loop:
         - python3-cryptography
-        - rsync
-
-    - name: Make sure rsync is installed on CA server
-      ansible.builtin.dnf:
-        name: rsync
-        state: latest
-      delegate_to: "{{ groups['ca'][0] }}"
 
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
@@ -90,9 +83,14 @@
         content: "{{ certificate.certificate }}"
       when: certificate is changed
 
-    - name: Write certificate file on destination server
-      ansible.builtin.synchronize:
+    - name: Fetch CA
+      ansible.builtin.fetch:
         src: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
         dest: "/tmp/test.pem"
-        mode: push
+        flat: true
       delegate_to: "{{ groups['ca'][0] }}"
+
+    - name: Copy CA to server
+      ansible.builtin.fetch:
+        src: "/tmp/test.pem"
+        dest: "/tmp/test.pem"
