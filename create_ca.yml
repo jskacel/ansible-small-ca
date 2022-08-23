@@ -5,6 +5,7 @@
 #  vars:
 #    secret_ca_passphrase: "Th3!PassW0rD" # (required)
 #    ca_path: "/certificates"             # (optional) - default is /certificates
+#    ca_certname: "ca-certificate"        # (optional) - default is ca-certificate
 #    ca_common_name: "Ansible CA"         # (optional) - default is "Ansible CA"
 #    country_name: "CZ"                   # (optional) - default is "CZ"
 #    state_or_province_name: "Brno"       # (optional) - default is "Brno"
@@ -34,13 +35,13 @@
 
     - name: Create private key with password protection
       community.crypto.openssl_privatekey:
-        path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
         cipher: auto
         passphrase: "{{ secret_ca_passphrase }}"
 
     - name: Create certificate signing request (CSR) for CA certificate
       community.crypto.openssl_csr_pipe:
-        privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        privatekey_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
         common_name: "{{ ca_common_name | default('Ansible CA') }}"
         country_name: "{{ country_name | default('CZ') }}"
@@ -59,8 +60,8 @@
 
     - name: Create self-signed CA certificate from CSR
       community.crypto.x509_certificate:
-        path: "{{ ca_path | default('/certificates') }}/ca-certificate.pem"
+        path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
         csr_content: "{{ ca_csr.csr }}"
-        privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        privatekey_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
         provider: selfsigned
