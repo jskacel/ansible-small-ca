@@ -38,7 +38,7 @@
         privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
         common_name: "{{ ca_common_name | default('Ansible CA') }}"
-        country_name: "{{ locality | default('Czech Republic') }}"
+        country_name: "{{ locality | default('CZ') }}"
         state_or_province_name: "{{ locality | default('Brno') }}"
         locality_name: "{{ locality | default('Brno') }}"
         organization_name: "{{ locality | default('Red Hat') }}"
