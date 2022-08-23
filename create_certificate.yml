@@ -21,6 +21,10 @@
 #      - "DNS:test2.techtalks.local"
 #      - "IP:192.168.100.70"             # you can use also IP
 
+  handlers:
+    - name: Update CA trust
+      ansible.builtin.command: /usr/bin/update-ca-trust
+
   tasks:
     - name: Check we have all variables configured
       ansible.builtin.assert:
@@ -86,11 +90,13 @@
     - name: Fetch CA
       ansible.builtin.fetch:
         src: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
-        dest: "/tmp/test.pem"
+        dest: "/tmp/{{ ca_certname | default('ca-certificate') }}.pem"
         flat: true
       delegate_to: "{{ groups['ca'][0] }}"
 
     - name: Copy CA to server
       ansible.builtin.copy:
-        src: "/tmp/test.pem"
-        dest: "/tmp/test.pem"
+        src: "/tmp/{{ ca_certname | default('ca-certificate') }}.pem"
+        dest: "/etc/pki/ca-trust/source/anchors/{{ ca_certname | default('ca-certificate') }}.pem"
+      notify:
+        - Update CA trust
