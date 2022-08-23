@@ -91,6 +91,6 @@
       delegate_to: "{{ groups['ca'][0] }}"
 
     - name: Copy CA to server
-      ansible.builtin.fetch:
+      ansible.builtin.copy:
         src: "/tmp/test.pem"
         dest: "/tmp/test.pem"
