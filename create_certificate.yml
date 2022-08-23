@@ -7,7 +7,7 @@
 #    secret_ca_passphrase: "Th3!PassW0rD"                               # (required)
 #    ca_path: "/certificates"                                           # (optional) - default is /certificates
 #    ca_certname: "ca-certificate"                                      # (optional) - default is ca-certificate
-#    ca_common_name: "{{ subject_alt_name[0] | split(':') | last }}"    # (optional) - default is "{{ subject_alt_name[0] | split(':') | last }}" (eg. test.techtalks.local)
+#    common_name: "{{ subject_alt_name[0] | split(':') | last }}"       # (optional) - default is "{{ subject_alt_name[0] | split(':') | last }}" (eg. test.techtalks.local)
 #    country_name: "CZ"                                                 # (optional) - default is "CZ"
 #    state_or_province_name: "Brno"                                     # (optional) - default is "Brno"
 #    locality_name: "Brno"                                              # (optional) - default is "Brno"
@@ -15,7 +15,6 @@
 #    organizational_unit_name: "Ansible"                                # (optional) - default is "Ansible"
 #    cert_path: "/etc/ssl/"                                             # (optional) - default is /etc/ssl
 #    cert_name: "{{ ansible.hostname }}"                                # (optional) - default is {{ ansible.hostname }}
-#    ca_common_name: "Ansible CA"                                       # (optional) - default is "Ansible CA"
 #    subject_alt_name:                                                  # (required) - do not use space between DNS: and <name>
 #      - "DNS:test.techtalks.local"
 #      - "DNS:test2.techtalks.local"
@@ -47,7 +46,7 @@
     - name: Create certificate signing request (CSR) for new certificate
       community.crypto.openssl_csr_pipe:
         privatekey_path: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.key"
-        common_name: "{{ ca_common_name | default(subject_alt_name[0] | split(':') | last) }}"
+        common_name: "{{ common_name | default(subject_alt_name[0] | split(':') | last) }}"
         country_name: "{{ country_name | default('CZ') }}"
         state_or_province_name: "{{ state_or_province_name | default('Brno') }}"
         locality_name: "{{ locality_name | default('Brno') }}"
