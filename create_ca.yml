@@ -6,6 +6,11 @@
 #    secret_ca_passphrase: "Th3!PassW0rD" # (required)
 #    ca_path: "/certificates"             # (optional) - default is /certificates
 #    ca_common_name: "Ansible CA"         # (optional) - default is "Ansible CA"
+#    country_name: "CZ"                   # (optional) - default is "CZ"
+#    state_or_province_name: "Brno"       # (optional) - default is "Brno"
+#    locality_name: "Brno"                # (optional) - default is "Brno"
+#    organization_name: "Red Hat"         # (optional) - default is "Red Hat"
+#    organizational_unit_name: "Ansible"  # (optional) - default is "Ansible"
 
   tasks:
     - name: Check we have all variables configured
@@ -38,11 +43,11 @@
         privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
         privatekey_passphrase: "{{ secret_ca_passphrase }}"
         common_name: "{{ ca_common_name | default('Ansible CA') }}"
-        country_name: "{{ locality | default('CZ') }}"
-        state_or_province_name: "{{ locality | default('Brno') }}"
-        locality_name: "{{ locality | default('Brno') }}"
-        organization_name: "{{ locality | default('Red Hat') }}"
-        organizational_unit_name: "{{ locality | default('Ansible') }}"
+        country_name: "{{ country_name | default('CZ') }}"
+        state_or_province_name: "{{ state_or_province_name | default('Brno') }}"
+        locality_name: "{{ locality_name | default('Brno') }}"
+        organization_name: "{{ organization_name | default('Red Hat') }}"
+        organizational_unit_name: "{{ organizational_unit_name | default('Ansible') }}"
         use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
         basic_constraints:
           - 'CA:TRUE'
