@@ -37,6 +37,12 @@
         - python3-cryptography
         - rsync
 
+    - name: Make sure rsync is installed on CA server
+      ansible.builtin.dnf:
+        name: rsync
+        state: latest
+      delegate_to: "{{ groups['ca'][0] }}"
+
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
         path: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.key"
