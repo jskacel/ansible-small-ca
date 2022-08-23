@@ -4,14 +4,22 @@
   serial: 1
 
 #  vars:
-#    secret_ca_passphrase: "Th3!PassW0rD" # (required)
-#    ca_path: "/certificates"             # (optional) - default is /certificates
-#    cert_path: "/etc/ssl/"               # (optional) - default is /etc/ssl
-#    ca_common_name: "Ansible CA"         # (optional) - default is "Ansible CA"
-#    subject_alt_name:                    # (required)
-#      - "DNS: test.techtalks.local"
-#      - "DNS: test2.techtalks.local"
-#      - "IP: 192.168.100.70"             # you can use also IP
+#    secret_ca_passphrase: "Th3!PassW0rD"           # (required)
+#    ca_path: "/certificates"                       # (optional) - default is /certificates
+#    ca_certname: "ca-certificate"                  # (optional) - default is ca-certificate
+#    ca_common_name: "{{ subject_alt_name[0] }}"    # (optional) - default is "{{ subject_alt_name[0] }}" 
+#    country_name: "CZ"                             # (optional) - default is "CZ"
+#    state_or_province_name: "Brno"                 # (optional) - default is "Brno"
+#    locality_name: "Brno"                          # (optional) - default is "Brno"
+#    organization_name: "Red Hat"                   # (optional) - default is "Red Hat"
+#    organizational_unit_name: "Ansible"            # (optional) - default is "Ansible"
+#    cert_path: "/etc/ssl/"                         # (optional) - default is /etc/ssl
+#    cert_name: "{{ ansible.hostname }}"            # (optional) - default is {{ ansible.hostname }}
+#    ca_common_name: "Ansible CA"                   # (optional) - default is "Ansible CA"
+#    subject_alt_name:                              # (required) - do not use space between DNS: and <name>
+#      - "DNS:test.techtalks.local"
+#      - "DNS:test2.techtalks.local"
+#      - "IP:192.168.100.70"             # you can use also IP
 
   tasks:
     - name: Check we have all variables configured
@@ -28,22 +36,28 @@
 
     - name: Create private key for new certificate
       community.crypto.openssl_privatekey:
-        path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.key"
+        path: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.key"
 
     - name: Create certificate signing request (CSR) for new certificate
       community.crypto.openssl_csr_pipe:
-        privatekey_path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.key"
+        privatekey_path: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.key"
+        common_name: "{{ ca_common_name | default(subject_alt_name[0]) }}"
+        country_name: "{{ country_name | default('CZ') }}"
+        state_or_province_name: "{{ state_or_province_name | default('Brno') }}"
+        locality_name: "{{ locality_name | default('Brno') }}"
+        organization_name: "{{ organization_name | default('Red Hat') }}"
+        organizational_unit_name: "{{ organizational_unit_name | default('Ansible') }}"
         subject_alt_name: "{{ subject_alt_name }}"
       register: csr
 
     - name: Check whether certificate exists
       ansible.builtin.stat:
-        path: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
+        path: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.pem"
       register: certificate_exists
 
     - name: Read existing certificate if exists
       ansible.builtin.slurp:
-        src: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
+        src: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.pem"
       when: certificate_exists.stat.exists
       register: certificate
 
@@ -52,8 +66,8 @@
         content: "{{ (certificate.content | b64decode) if certificate_exists.stat.exists else omit }}"
         csr_content: "{{ csr.csr }}"
         provider: ownca
-        ownca_path: "{{ ca_path | default('/certificates') }}/ca-certificate.pem"
-        ownca_privatekey_path: "{{ ca_path | default('/certificates') }}/ca-certificate.key"
+        ownca_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
+        ownca_privatekey_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
         ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
         ownca_not_after: +365d  # valid for one year
         ownca_not_before: "-1d"  # valid since yesterday
@@ -61,8 +75,8 @@
       run_once: true
       register: certificate
 
-    - name: Write certificate file on server_1
+    - name: Write certificate file on destination server
       ansible.builtin.copy:
-        dest: "{{ cert_pathca_path | default('/etc/ssl') }}/certificate.pem"
+        dest: "{{ cert_pathca_path | default('/etc/ssl') }}/{{ cert_name | default(ansible_hostname) }}.pem"
         content: "{{ certificate.certificate }}"
       when: certificate is changed
