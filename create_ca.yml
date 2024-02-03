@@ -3,7 +3,7 @@
   hosts: ca
 
 #  vars:
-#    secret_ca_passphrase: "Th3!PassW0rD" # (required)
+#    secret_ca_passphrase: "Th3!PassW0rD" # (optional) - default is Th3!PassW0rD
 #    ca_path: "/certificates"             # (optional) - default is /certificates
 #    ca_certname: "ca-certificate"        # (optional) - default is ca-certificate
 #    ca_common_name: "Ansible CA"         # (optional) - default is "Ansible CA"
@@ -42,7 +42,7 @@
     - name: Create certificate signing request (CSR) for CA certificate
       community.crypto.openssl_csr_pipe:
         privatekey_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
-        privatekey_passphrase: "{{ secret_ca_passphrase }}"
+        privatekey_passphrase: "{{ secret_ca_passphrase | default('Th3!PassW0rD') }}"
         common_name: "{{ ca_common_name | default('Ansible CA') }}"
         country_name: "{{ country_name | default('CZ') }}"
         state_or_province_name: "{{ state_or_province_name | default('Brno') }}"
