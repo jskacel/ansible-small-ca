@@ -14,12 +14,6 @@
 #    organizational_unit_name: "Ansible"  # (optional) - default is "Ansible"
 
   tasks:
-    - name: Check we have all variables configured
-      ansible.builtin.assert:
-        that:
-          - secret_ca_passphrase is defined
-        fail_msg: "Failed: Variable secret_ca_passphrase is not set."
-    
     - name: Make sure folder for CA exists
       ansible.builtin.file:
         path: "{{ ca_path | default('/certificates') }}"
@@ -31,13 +25,13 @@
     - name: Make sure python3-cryptography package is installed
       ansible.builtin.dnf:
         name: python3-cryptography
-        state: latest        
+        state: latest
 
     - name: Create private key with password protection
       community.crypto.openssl_privatekey:
         path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
         cipher: auto
-        passphrase: "{{ secret_ca_passphrase }}"
+        passphrase: "{{ secret_ca_passphrase | default('Th3!PassW0rD') }}"
 
     - name: Create certificate signing request (CSR) for CA certificate
       community.crypto.openssl_csr_pipe:
@@ -63,5 +57,5 @@
         path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.pem"
         csr_content: "{{ ca_csr.csr }}"
         privatekey_path: "{{ ca_path | default('/certificates') }}/{{ ca_certname | default('ca-certificate') }}.key"
-        privatekey_passphrase: "{{ secret_ca_passphrase }}"
+        privatekey_passphrase: "{{ secret_ca_passphrase | default('Th3!PassW0rD') }}"
         provider: selfsigned
